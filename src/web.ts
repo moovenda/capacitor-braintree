@@ -1,10 +1,18 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type { BraintreePlugin } from './definitions';
+import type {
+  BraintreePlugin,
+  DropInOptions,
+  DropInResult,
+  DropInToken,
+} from './definitions';
 
 export class BraintreeWeb extends WebPlugin implements BraintreePlugin {
-  async echo(options: { value: string }): Promise<{ value: string }> {
-    console.log('ECHO', options);
-    return options;
+  setToken(options: DropInToken): Promise<any> {
+    return this.setToken(options);
+  }
+
+  showDropIn(options: DropInOptions): Promise<DropInResult> {
+    return this.showDropIn(options);
   }
 }

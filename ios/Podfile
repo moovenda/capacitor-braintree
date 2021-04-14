@@ -3,6 +3,13 @@ platform :ios, '12.0'
 def capacitor_pods
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
+  pod 'Braintree'
+  pod 'BraintreeDropIn'
+  pod 'Braintree/PayPal'
+  pod 'Braintree/Apple-Pay'
+  pod 'Braintree/Venmo'
+  pod 'Braintree/DataCollector'
+  pod 'Braintree/PayPalDataCollector'
   pod 'Capacitor', :path => '../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../node_modules/@capacitor/ios'
 end
