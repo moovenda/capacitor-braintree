@@ -64,10 +64,18 @@ showDropIn(options: DropInOptions) => any
 
 #### DropInOptions
 
-| Prop           | Type                |
-| -------------- | ------------------- |
-| **`amount`**   | <code>string</code> |
-| **`disabled`** | <code>{}</code>     |
+| Prop                    | Type                |
+| ----------------------- | ------------------- |
+| **`amount`**            | <code>string</code> |
+| **`disabled`**          | <code>{}</code>     |
+| **`givenName`**         | <code>string</code> |
+| **`surname`**           | <code>string</code> |
+| **`email`**             | <code>string</code> |
+| **`phoneNumber`**       | <code>string</code> |
+| **`streetAddress`**     | <code>string</code> |
+| **`postalCode`**        | <code>string</code> |
+| **`locality`**          | <code>string</code> |
+| **`countryCodeAlpha2`** | <code>string</code> |
 
 
 #### DropInResult

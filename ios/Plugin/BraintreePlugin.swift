@@ -48,7 +48,7 @@ public class BraintreePlugin: CAPPlugin {
 
         let threeDSecureRequest = BTThreeDSecureRequest()
         threeDSecureRequest.versionRequested = .version2
-        threeDSecureRequest.amount = amount
+        threeDSecureRequest.amount = NSDecimalNumber(string: amount)
         threeDSecureRequest.email = call.getString("email") ?? ""
 
         let address = BTThreeDSecurePostalAddress()
