@@ -2,10 +2,6 @@ export interface DropInToken {
   token: string;
 }
 
-export interface DataCollectorOptions {
-  merchantId: string;
-}
-
 export interface DropInOptions {
   amount: string;
   disabled?: string[];
@@ -17,6 +13,10 @@ export interface DropInOptions {
   postalCode: string | undefined;
   locality: string | undefined;
   countryCodeAlpha2: string | undefined;
+}
+
+export interface DataCollectorOptions {
+  merchantId: string;
 }
 
 export interface DropInResult {
@@ -52,7 +52,7 @@ export interface DropInResult {
 export interface BraintreePlugin {
   setToken(options: DropInToken): Promise<any>;
 
-  showDropIn(options: DropInOptions): Promise<DropInResult>
+  showDropIn(options: DropInOptions): Promise<DropInResult>;
 
-  getDeviceData(options: DataCollectorOptions): Promise<any>
+  getDeviceData(options: DataCollectorOptions): Promise<any>;
 }

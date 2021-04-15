@@ -5,7 +5,7 @@ import type {
   DropInOptions,
   DropInResult,
   DropInToken,
-  DataCollectorOptions,
+  DataCollectorOptions
 } from './definitions';
 
 export class BraintreeWeb extends WebPlugin implements BraintreePlugin {

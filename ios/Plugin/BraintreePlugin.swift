@@ -13,12 +13,12 @@ public class BraintreePlugin: CAPPlugin {
      */
     @objc func getDeviceData(_ call: CAPPluginCall) {
         let metchantId = call.getString("merchantId") ?? ""
-        dataCollector.setFraudMerchantId(metchantId)
+        self.dataCollector.setFraudMerchantId(metchantId)
         self.dataCollector.collectCardFraudData() { deviceData in
             call.resolve([deviceData: deviceData])
         }
     }
-    
+
     /**
      * Set Braintree API token
      * Set Braintree Switch URL
@@ -124,7 +124,7 @@ public class BraintreePlugin: CAPPlugin {
         response["nonce"] = paymentMethodNonce.nonce
         response["type"] = paymentMethodNonce.type
         response["localizedDescription"] = paymentMethodNonce.localizedDescription
-        
+
         /**
          * Handle Paypal Response
          */
