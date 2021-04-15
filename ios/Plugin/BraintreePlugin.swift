@@ -38,6 +38,11 @@ public class BraintreePlugin: CAPPlugin {
             call.reject("A token is required.")
             return
         }
+
+        if let apiClient = BTAPIClient(authorization: self.token) {
+            self.dataCollector = BTDataCollector(apiClient: apiClient)
+        }
+
         call.resolve()
     }
 

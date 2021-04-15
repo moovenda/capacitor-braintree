@@ -1,6 +1,6 @@
 {
   "name": "@moovenda/capacitor-braintree",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Capacitor v3+ Braintree Native SDK plugin",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
