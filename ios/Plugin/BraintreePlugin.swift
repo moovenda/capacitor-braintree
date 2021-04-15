@@ -6,7 +6,19 @@ import BraintreeDropIn
 @objc(BraintreePlugin)
 public class BraintreePlugin: CAPPlugin {
     var token: String!
+    var dataCollector: BTDataCollector!
 
+    /**
+     * Get device date
+     */
+    @objc func getDeviceData(_ call: CAPPluginCall) {
+        let metchantId = call.getString("merchantId") ?? ""
+        dataCollector.setFraudMerchantId(metchantId)
+        self.dataCollector.collectCardFraudData() { deviceData in
+            call.resolve([deviceData: deviceData])
+        }
+    }
+    
     /**
      * Set Braintree API token
      * Set Braintree Switch URL
@@ -112,12 +124,13 @@ public class BraintreePlugin: CAPPlugin {
         response["nonce"] = paymentMethodNonce.nonce
         response["type"] = paymentMethodNonce.type
         response["localizedDescription"] = paymentMethodNonce.localizedDescription
-
+        
         /**
          * Handle Paypal Response
          */
         if(paymentMethodNonce is BTPayPalAccountNonce){
             payPalAccountNonce = paymentMethodNonce as! BTPayPalAccountNonce
+            response["deviceData"] = PPDataCollector.collectPayPalDeviceData()
             response["paypal"] = [
                 "email": payPalAccountNonce.email,
                 "firstName": payPalAccountNonce.firstName,
@@ -133,6 +146,7 @@ public class BraintreePlugin: CAPPlugin {
          */
         if(paymentMethodNonce is BTCardNonce){
             cardNonce = paymentMethodNonce as! BTCardNonce
+            response["deviceData"] = PPDataCollector.collectPayPalDeviceData()
             response["card"] = [
                 "lastTwo": cardNonce.lastTwo!,
                 //"network": cardNonce.cardNetwork // <---------------@@@ this cause error in IOS

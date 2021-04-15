@@ -2,6 +2,10 @@ export interface DropInToken {
   token: string;
 }
 
+export interface DataCollectorOptions {
+  merchantId: string;
+}
+
 export interface DropInOptions {
   amount: string;
   disabled?: string[];
@@ -20,6 +24,7 @@ export interface DropInResult {
   nonce: string;
   type: string;
   localizedDescription: string;
+  deviceData: string;
   card: {
     lastTwo: string;
     network: string;
@@ -48,4 +53,6 @@ export interface BraintreePlugin {
   setToken(options: DropInToken): Promise<any>;
 
   showDropIn(options: DropInOptions): Promise<DropInResult>
+
+  getDeviceData(options: DataCollectorOptions): Promise<any>
 }

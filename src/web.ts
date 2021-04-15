@@ -5,6 +5,7 @@ import type {
   DropInOptions,
   DropInResult,
   DropInToken,
+  DataCollectorOptions,
 } from './definitions';
 
 export class BraintreeWeb extends WebPlugin implements BraintreePlugin {
@@ -14,5 +15,9 @@ export class BraintreeWeb extends WebPlugin implements BraintreePlugin {
 
   showDropIn(options: DropInOptions): Promise<DropInResult> {
     return this.showDropIn(options);
+  }
+
+  getDeviceData(options: DataCollectorOptions): Promise<any> {
+    return this.getDeviceData(options);
   }
 }

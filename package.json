@@ -64,6 +64,9 @@
     "@capacitor/core": "next"
   },
   "prettier": "@ionic/prettier-config",
+  "eslintConfig": {
+    "extends": "@ionic/eslint-config/recommended"
+  },
   "swiftlint": "@ionic/swiftlint-config",
   "capacitor": {
     "ios": {

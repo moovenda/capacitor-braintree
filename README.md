@@ -15,6 +15,7 @@ npx cap sync
 
 * [`setToken(...)`](#settoken)
 * [`showDropIn(...)`](#showdropin)
+* [`getDeviceData(...)`](#getdevicedata)
 * [Interfaces](#interfaces)
 
 </docgen-index>
@@ -46,6 +47,21 @@ showDropIn(options: DropInOptions) => any
 | Param         | Type                                                    |
 | ------------- | ------------------------------------------------------- |
 | **`options`** | <code><a href="#dropinoptions">DropInOptions</a></code> |
+
+**Returns:** <code>any</code>
+
+--------------------
+
+
+### getDeviceData(...)
+
+```typescript
+getDeviceData(options: DataCollectorOptions) => any
+```
+
+| Param         | Type                                                                  |
+| ------------- | --------------------------------------------------------------------- |
+| **`options`** | <code><a href="#datacollectoroptions">DataCollectorOptions</a></code> |
 
 **Returns:** <code>any</code>
 
@@ -86,10 +102,18 @@ showDropIn(options: DropInOptions) => any
 | **`nonce`**                | <code>string</code>                                                                                                                                                             |
 | **`type`**                 | <code>string</code>                                                                                                                                                             |
 | **`localizedDescription`** | <code>string</code>                                                                                                                                                             |
+| **`deviceData`**           | <code>string</code>                                                                                                                                                             |
 | **`card`**                 | <code>{ lastTwo: string; network: string; }</code>                                                                                                                              |
 | **`payPalAccount`**        | <code>{ email: string; firstName: string; lastName: string; phone: string; billingAddress: string; shippingAddress: string; clientMetadataId: string; payerId: string; }</code> |
 | **`applePaycard`**         | <code>any</code>                                                                                                                                                                |
 | **`threeDSecureCard`**     | <code>{ liabilityShifted: boolean; liabilityShiftPossible: boolean; }</code>                                                                                                    |
 | **`venmoAccount`**         | <code>{ username: string; }</code>                                                                                                                                              |
+
+
+#### DataCollectorOptions
+
+| Prop             | Type                |
+| ---------------- | ------------------- |
+| **`merchantId`** | <code>string</code> |
 
 </docgen-api>
