@@ -27,8 +27,17 @@ public class BraintreePlugin: CAPPlugin {
         /**
          * Set App Switch
          */
-        let bundleIdentifier = Bundle.main.bundleIdentifier!
-        BTAppSwitch.setReturnURLScheme("\(bundleIdentifier).payments")
+        guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
+            call.error("iOS internal error - failed to get bundle identifier via Bundle.main.bundleIdentifier");
+            return
+        }
+
+        if bundleIdentifier.count == 0 {
+            call.error("iOS internal error - bundle identifier via Bundle.main.bundleIdentifier was zero length");
+            return
+        }
+
+        BTAppSwitch.setReturnURLScheme(bundleIdentifier + ".payments")
 
         /**
          * Assign API token
@@ -58,11 +67,6 @@ public class BraintreePlugin: CAPPlugin {
         /**
          * DropIn UI Request
          */
-        let request = BTDropInRequest()
-        request.cardholderNameSetting = .required
-        request.threeDSecureVerification = true
-        // request.amount = amount
-
         let threeDSecureRequest = BTThreeDSecureRequest()
         threeDSecureRequest.versionRequested = .version2
         threeDSecureRequest.amount = NSDecimalNumber(string: amount)
@@ -80,6 +84,7 @@ public class BraintreePlugin: CAPPlugin {
 
         let dropInRequest = BTDropInRequest()
         dropInRequest.threeDSecureVerification = true
+        dropInRequest.cardholderNameSetting = .required
         dropInRequest.threeDSecureRequest = threeDSecureRequest
 
         /**
@@ -88,16 +93,16 @@ public class BraintreePlugin: CAPPlugin {
         if call.hasOption("disabled") {
             let disabled = call.getArray("disabled", String.self)
             if disabled!.contains("paypal") {
-                request.paypalDisabled = true;
+                dropInRequest.paypalDisabled = true;
             }
             if disabled!.contains("venmo") {
-                request.venmoDisabled = true;
+                dropInRequest.venmoDisabled = true;
             }
             if disabled!.contains("applePay") {
-                request.applePayDisabled = true;
+                dropInRequest.applePayDisabled = true;
             }
             if disabled!.contains("card") {
-                request.cardDisabled = true;
+                dropInRequest.cardDisabled = true;
             }
         }
 

@@ -1,7 +1,7 @@
 {
   "name": "@moovenda/capacitor-braintree",
-  "version": "0.0.3",
-  "description": "Capacitor v3+ Braintree Native SDK plugin",
+  "version": "0.0.4",
+  "description": "Capacitor v3+ Braintree Native SDK plugin for 3D Secure-enabled payments",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",

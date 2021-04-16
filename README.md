@@ -4,13 +4,35 @@ Android still not implemented.
 
 # @moovenda/capacitor-braintree
 
-Capacitor v3+ Braintree Native SDK plugin
+Capacitor v3+ Braintree Native SDK plugin for 3D Secure-enabled payments
 
 ## Install
 
 ```bash
 npm install @moovenda/capacitor-braintree
 npx cap sync
+```
+
+## iOS Setup
+### Register a URL type
+
+1. In Xcode, click on your project in the Project Navigator and navigate to **App Target > Info > URL Types**
+2. Click **[+]** to add a new URL type
+3. Under **URL Schemes**, enter your app switch return URL scheme. This scheme must start with your app's Bundle ID and be dedicated to Braintree app switch returns. For example, if the app bundle ID is `com.your-company.your-app`, then your URL scheme could be `com.your-company.your-app.payments`.
+
+For further informations please refer to the [official docs](https://developers.braintreepayments.com/guides/client-sdk/setup/ios/v4).
+
+### Add listener in your AppDelegate.swift
+
+1. Open your `ios/App/App/AppDelegate.swift` file
+2. Import the braintree SDK with `import Braintree`
+3. Search for the function `func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool`
+4. Append the following snippet above the `return` line
+
+```swift
+if url.scheme?.localizedCaseInsensitiveCompare("com.moovenda.cliente.payments") == .orderedSame {
+  BTAppSwitch.handleOpen(url, options: options)
+}
 ```
 
 ## API
