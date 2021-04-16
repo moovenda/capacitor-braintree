@@ -8,10 +8,8 @@ Capacitor v3+ Braintree Native SDK plugin for 3D Secure-enabled payments
 
 ## Install
 
-```bash
-npm install @moovenda/capacitor-braintree
-npx cap sync
-```
+1. `npm install @moovenda/capacitor-braintree`
+2. `npx cap sync`
 
 ## iOS Setup
 ### Register a URL type
@@ -143,3 +141,4 @@ getDeviceData(options: DataCollectorOptions) => any
 | **`merchantId`** | <code>string</code> |
 
 </docgen-api>
+
