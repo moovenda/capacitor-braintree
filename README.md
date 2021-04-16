@@ -30,7 +30,7 @@ For further informations please refer to the [official docs](https://developers.
 4. Append the following snippet above the `return` line
 
 ```swift
-if url.scheme?.localizedCaseInsensitiveCompare("com.moovenda.cliente.payments") == .orderedSame {
+if url.scheme?.localizedCaseInsensitiveCompare("com.your-company.your-app.payments") == .orderedSame {
   BTAppSwitch.handleOpen(url, options: options)
 }
 ```
