@@ -5,10 +5,18 @@ import android.app.Activity;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.braintreepayments.api.BraintreeFragment;
+import com.braintreepayments.api.DataCollector;
+import com.braintreepayments.api.exceptions.InvalidArgumentException;
+import com.braintreepayments.api.interfaces.BraintreeResponseListener;
 import com.braintreepayments.api.models.CardNonce;
 import com.braintreepayments.api.models.PayPalAccountNonce;
 import com.braintreepayments.api.models.ThreeDSecureInfo;
+import com.braintreepayments.api.models.ThreeDSecurePostalAddress;
+import com.braintreepayments.api.models.ThreeDSecureRequest;
+import com.braintreepayments.api.models.ThreeDSecureAdditionalInformation;
 import com.braintreepayments.api.models.VenmoAccountNonce;
+import com.braintreepayments.cardform.view.CardForm;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -28,6 +36,7 @@ import com.braintreepayments.api.models.PaymentMethodNonce;
 public class BraintreePlugin extends Plugin {
 
    private String clientToken;
+   private BraintreeFragment mBraintreeFragment;
 
     /**
      * Logger tag
@@ -51,23 +60,66 @@ public class BraintreePlugin extends Plugin {
     // private static final int PREFERRED_PAYMENT_METHODS_REQUEST = 8;
 
     @PluginMethod()
-    public void setToken(PluginCall call) {
+    public void getDeviceData(PluginCall call) {
+        String metchantId = call.getString("merchantId");
+
+        if (!call.getData().has("metchantId")){
+            call.reject("A Merchant ID is required.");
+            return;
+        }
+        DataCollector.collectDeviceData(this.mBraintreeFragment, new BraintreeResponseListener<String>() {
+            @Override
+            public void onResponse(String deviceData) {
+                JSObject innerMap = new JSObject();
+                innerMap.put("deviceData", deviceData);
+                call.resolve(innerMap);
+            }
+        });
+    }
+
+    @PluginMethod()
+    public void setToken(PluginCall call) throws InvalidArgumentException {
         String token = call.getString("token");
 
         if (!call.getData().has("token")){
             call.reject("A token is required.");
             return;
         }
+        Activity activity = this.bridge.getActivity();
         this.clientToken = token;
+        this.mBraintreeFragment = BraintreeFragment.newInstance(activity, token);
         call.resolve();
     }
 
     @PluginMethod()
     public void showDropIn(PluginCall call) {
         saveCall(call);
-        DropInRequest dropInRequest = new DropInRequest().clientToken(this.clientToken);
+
+        ThreeDSecurePostalAddress address = new ThreeDSecurePostalAddress()
+            .firstName(call.getString("givenName")) // ASCII-printable characters required, else will throw a validation error
+            .lastName(call.getString("surname")) // ASCII-printable characters required, else will throw a validation error
+            .phoneNumber(call.getString("phoneNumber"))
+            .streetAddress(call.getString("streetAddress"))
+            .locality(call.getString("locality"))
+            .postalCode(call.getString("postalCode"))
+            .countryCodeAlpha2(call.getString("countryCodeAlpha2"));
+        ThreeDSecureAdditionalInformation additionalInformation = new ThreeDSecureAdditionalInformation()
+            .shippingAddress(address);
+        ThreeDSecureRequest threeDSecureRequest = new ThreeDSecureRequest()
+            .amount(call.getString("amount"))
+            .email(call.getString("email"))
+            .billingAddress(address)
+            .versionRequested(ThreeDSecureRequest.VERSION_2)
+            .additionalInformation(additionalInformation);
+        DropInRequest dropInRequest = new DropInRequest()
+            .clientToken(this.clientToken)
+            .cardholderNameStatus(CardForm.FIELD_REQUIRED)
+            .requestThreeDSecureVerification(true)
+            .threeDSecureRequest(threeDSecureRequest);
         Intent intent = dropInRequest.getIntent(getContext());
+
         Log.d(PLUGIN_TAG, "showDropIn started");
+
         startActivityForResult(call, intent, DROP_IN_REQUEST);
     }
 

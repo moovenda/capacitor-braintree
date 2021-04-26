@@ -9,6 +9,13 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://cardinalcommerce.bintray.com/android"
+            credentials {
+                username 'braintree-team-sdk@cardinalcommerce'
+                password '220cc9476025679c4e5c843666c27d97cfb0f951'
+            }
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.2'
@@ -52,8 +59,27 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':capacitor-android')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation 'com.braintreepayments.api:drop-in:3.7.1'
+    implementation 'com.braintreepayments.api:braintree:3.17.2'
+    implementation 'com.braintreepayments:card-form:5.1.1'
+    implementation ('com.braintreepayments.api:drop-in:5.2.1') {
+        transitive = false
+    }
+    implementation 'com.braintreepayments.api:data-collector:3.+'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    components.all {
+        allVariants {
+        withDependencies { deps ->
+            deps.each { dep ->
+            if (dep.group == 'net.minidev' && dep.name =='json-smart') {
+                dep.version {
+                    prefer "2.3"
+                }
+                dep.because "resolving dependencies issue"
+            }
+            }
+        }
+        }
+    }
 }

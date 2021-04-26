@@ -13,6 +13,12 @@ public class BraintreePlugin: CAPPlugin {
      */
     @objc func getDeviceData(_ call: CAPPluginCall) {
         let metchantId = call.getString("merchantId") ?? ""
+
+        if self.dataCollector.isEmpty {
+            call.reject("A Merchant ID is required.")
+            return
+        }
+
         self.dataCollector.setFraudMerchantId(metchantId)
         self.dataCollector.collectCardFraudData() { deviceData in
             call.resolve([deviceData: deviceData])

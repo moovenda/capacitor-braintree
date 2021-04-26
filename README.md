@@ -33,6 +33,68 @@ if url.scheme?.localizedCaseInsensitiveCompare("com.your-company.your-app.paymen
 }
 ```
 
+## Android Setup
+
+### Browser switch setup
+
+1. Edit your `android/app/src/main/AndroidManifest.xml` file
+2. Add this snippet between within the `<application>` tag:
+
+```
+<activity android:name="com.braintreepayments.api.BraintreeBrowserSwitchActivity"
+    android:launchMode="singleTask">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="${applicationId}.braintree" />
+    </intent-filter>
+</activity>
+```
+
+## Usage example
+
+```javascript
+import { Braintree } from '@moovenda/capacitor-braintree';
+
+let payment;
+
+try {
+  await Braintree.setToken({
+    token: CLIENT_TOKEN_FROM_SERVER,
+  });
+
+  payment = await Braintree.showDropIn({
+    amount: '0.00',
+    disabled: ['venmo', 'applePay', 'googlePay'],
+    givenName: customerDetails.firstName,
+    surname: customerDetails.lastName,
+    email: customerDetails.email,
+    phoneNumber: customerDetails.phone,
+    streetAddress: customerDetails.streetAddress,
+    postalCode: customerDetails.zipcode,
+    locality: customerDetails.city,
+    countryCodeAlpha2: customerDetails.CountryAlphaCode,
+  });
+} catch(e) {
+  console.error(e);
+}
+
+if (!payment.cancelled || !payment.nonce) {
+  try {
+    const deviceData = await Braintree.getDeviceData({
+      merchantId: BRAINTREE_MERCHANT_ID,
+    });
+    await yourApiCall(`order/${orderId}/pay`, {
+      nonce: payment.nonce,
+      deviceData: deviceData,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+```
+
 ## API
 
 <docgen-index>
