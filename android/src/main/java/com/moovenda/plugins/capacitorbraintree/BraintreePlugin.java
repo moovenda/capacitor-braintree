@@ -74,8 +74,12 @@ public class BraintreePlugin extends Plugin {
             call.reject("A Merchant ID is required.");
             return;
         }
-        JSObject deviceDataMap = new JSObject(this.deviceData);
-        call.resolve(deviceDataMap);
+        try {
+           JSObject deviceDataMap = new JSObject(this.deviceData);
+            call.resolve(deviceDataMap);
+        } catch (JSONException e) {
+            call.reject("Cannot get device data");
+        }
     }
 
     @PluginMethod()

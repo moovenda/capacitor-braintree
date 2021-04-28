@@ -1,7 +1,3 @@
-# WORK IN PROGRESS
-
-Android still not implemented.
-
 # @moovenda/capacitor-braintree
 
 Capacitor v3+ Braintree Native SDK plugin for 3D Secure-enabled payments
