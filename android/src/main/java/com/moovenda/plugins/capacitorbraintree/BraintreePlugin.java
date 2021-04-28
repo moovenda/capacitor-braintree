@@ -22,6 +22,7 @@ import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.BridgeFragment;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import com.braintreepayments.api.dropin.DropInActivity;
@@ -85,9 +86,8 @@ public class BraintreePlugin extends Plugin {
             call.reject("A token is required.");
             return;
         }
-        Activity activity = this.bridge.getActivity();
         this.clientToken = token;
-        this.mBraintreeFragment = BraintreeFragment.newInstance(activity, token);
+        this.mBraintreeFragment = BraintreeFragment.newInstance(getActivity(), token);
         call.resolve();
     }
 
@@ -104,7 +104,7 @@ public class BraintreePlugin extends Plugin {
             .postalCode(call.getString("postalCode"))
             .countryCodeAlpha2(call.getString("countryCodeAlpha2"));
         ThreeDSecureAdditionalInformation additionalInformation = new ThreeDSecureAdditionalInformation()
-            .shippingAddress(address);
+           .shippingAddress(address);
         ThreeDSecureRequest threeDSecureRequest = new ThreeDSecureRequest()
             .amount(call.getString("amount"))
             .email(call.getString("email"))

@@ -51,6 +51,22 @@ if url.scheme?.localizedCaseInsensitiveCompare("com.your-company.your-app.paymen
     </intent-filter>
 </activity>
 ```
+3. Require cardinalcommerce editing the application's `build.gradle` adding the following repository:
+```
+ allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "https://cardinalcommerce.bintray.com/android"
+            credentials {
+                username 'braintree-team-sdk@cardinalcommerce'
+                password '220cc9476025679c4e5c843666c27d97cfb0f951'
+            }
+        }
+    }
+}
+```
 
 ## Usage example
 
