@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.os.Parcelable;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResult;
+
 import com.braintreepayments.api.BraintreeFragment;
 import com.braintreepayments.api.DataCollector;
 import com.braintreepayments.api.exceptions.InvalidArgumentException;
@@ -18,11 +20,11 @@ import com.braintreepayments.api.models.ThreeDSecureAdditionalInformation;
 import com.braintreepayments.api.models.VenmoAccountNonce;
 import com.braintreepayments.cardform.view.CardForm;
 import com.getcapacitor.JSObject;
-import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.BridgeFragment;
+import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import com.braintreepayments.api.dropin.DropInActivity;
@@ -31,9 +33,12 @@ import com.braintreepayments.api.dropin.DropInResult;
 
 import com.braintreepayments.api.models.PaymentMethodNonce;
 
-// force firing "handleOnActivityResult" after Braintree activity ends
-@NativePlugin(requestCodes={BraintreePlugin.DROP_IN_REQUEST})
-@CapacitorPlugin(name = "Braintree")
+@CapacitorPlugin(
+        name = "Braintree"
+        //requestCodes = {
+        //        BraintreePlugin.DROP_IN_REQUEST
+        //}
+)
 public class BraintreePlugin extends Plugin {
 
    private String clientToken;
@@ -46,7 +51,8 @@ public class BraintreePlugin extends Plugin {
 
     static final String EXTRA_PAYMENT_RESULT = "payment_result";
     static final String EXTRA_DEVICE_DATA = "device_data";
-    // static final String EXTRA_COLLECT_DEVICE_DATA = "collect_device_data";
+    //static final String EXTRA_COLLECT_DEVICE_DATA = "collect_device_data";
+    private String deviceData = "";
 
     /**
      * In this version (simplified) using only "dropin" with nonce processed on server-side
@@ -62,20 +68,14 @@ public class BraintreePlugin extends Plugin {
 
     @PluginMethod()
     public void getDeviceData(PluginCall call) {
-        String metchantId = call.getString("merchantId");
+        String merchantId = call.getString("merchantId");
 
-        if (!call.getData().has("metchantId")){
+        if (merchantId == null) {
             call.reject("A Merchant ID is required.");
             return;
         }
-        DataCollector.collectDeviceData(this.mBraintreeFragment, new BraintreeResponseListener<String>() {
-            @Override
-            public void onResponse(String deviceData) {
-                JSObject innerMap = new JSObject();
-                innerMap.put("deviceData", deviceData);
-                call.resolve(innerMap);
-            }
-        });
+        JSObject deviceDataMap = new JSObject(this.deviceData);
+        call.resolve(deviceDataMap);
     }
 
     @PluginMethod()
@@ -87,17 +87,14 @@ public class BraintreePlugin extends Plugin {
             return;
         }
         this.clientToken = token;
-        this.mBraintreeFragment = BraintreeFragment.newInstance(getActivity(), token);
         call.resolve();
     }
 
     @PluginMethod()
     public void showDropIn(PluginCall call) {
-        saveCall(call);
-
         ThreeDSecurePostalAddress address = new ThreeDSecurePostalAddress()
-            .firstName(call.getString("givenName")) // ASCII-printable characters required, else will throw a validation error
-            .lastName(call.getString("surname")) // ASCII-printable characters required, else will throw a validation error
+            .givenName(call.getString("givenName")) // ASCII-printable characters required, else will throw a validation error
+            .surname(call.getString("surname")) // ASCII-printable characters required, else will throw a validation error
             .phoneNumber(call.getString("phoneNumber"))
             .streetAddress(call.getString("streetAddress"))
             .locality(call.getString("locality"))
@@ -115,44 +112,39 @@ public class BraintreePlugin extends Plugin {
             .clientToken(this.clientToken)
             .cardholderNameStatus(CardForm.FIELD_REQUIRED)
             .requestThreeDSecureVerification(true)
+            .collectDeviceData(true)
             .threeDSecureRequest(threeDSecureRequest);
         Intent intent = dropInRequest.getIntent(getContext());
 
         Log.d(PLUGIN_TAG, "showDropIn started");
 
-        startActivityForResult(call, intent, DROP_IN_REQUEST);
+        startActivityForResult(call, intent, "dropinCallback");
     }
 
-    @Override
-    protected void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
-        super.handleOnActivityResult(requestCode, resultCode, data);
+    @ActivityCallback
+    protected void dropinCallback(PluginCall call, ActivityResult activityResult) {
+        Intent data = activityResult.getData();
 
-        Log.d(PLUGIN_TAG, "handleOnActivityResult. Result code: "+resultCode+", intent: "+data);
+        Log.d(PLUGIN_TAG, "dropinCallback. Result code: "+activityResult.getResultCode()+", intent: "+data);
 
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == DROP_IN_REQUEST) {
-                DropInResult result = data.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
-                handleNonce(result.getPaymentMethodNonce(), result.getDeviceData());
-            } else {
-                // -- this is not used now, but implementation can be done, ex:
-                //[..]
-                //    Intent intent = new Intent(this, PayPalActivity.class).putExtra(EXTRA_COLLECT_DEVICE_DATA, Settings.shouldCollectDeviceData(this));
-                //    startActivityForResult(intent, PAYPAL_REQUEST);
-                //[..]
-                Parcelable returnedData = data.getParcelableExtra(EXTRA_PAYMENT_RESULT);
-                String deviceData = data.getStringExtra(EXTRA_DEVICE_DATA);
-                if (returnedData instanceof PaymentMethodNonce) {
-                    handleNonce((PaymentMethodNonce) returnedData, deviceData);
-                }
-            }
-        } else if (resultCode == Activity.RESULT_CANCELED) {
+        if (call == null) {
+            return;
+        }
+
+        if (activityResult.getResultCode() == Activity.RESULT_CANCELED) {
             DropInResult result = data.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
-            handleCanceled(result.getDeviceData());
+            call.resolve(handleCanceled(result.getDeviceData()));
+        }
+
+
+        if (activityResult.getResultCode() == Activity.RESULT_OK) {
+            DropInResult result = data.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
+            call.resolve(handleNonce(result.getPaymentMethodNonce(), result.getDeviceData()));
         } else {
             Exception ex = (Exception) data.getSerializableExtra(DropInActivity.EXTRA_ERROR);
             String msg = ex.getMessage();
             Log.e(PLUGIN_TAG, "Error: "+msg);
-            handleError(msg, ex);
+            call.reject(msg, ex);
         }
     }
 
@@ -160,31 +152,13 @@ public class BraintreePlugin extends Plugin {
      *
      * @param deviceData device info (not used in context)
      */
-    @SuppressWarnings("unused")
-    private void handleCanceled(String deviceData) {
-        PluginCall call = getSavedCall();
-        if (call == null) return;
-
+    private JSObject handleCanceled(String deviceData) {
         Log.d(PLUGIN_TAG, "handleNonce");
 
         JSObject resultMap = new JSObject();
         resultMap.put("cancelled", true);
-        //resultMap.put("deviceData", deviceData);
-        call.resolve(resultMap); // call.resolve(resultMap)
-    }
-
-    /**
-     *
-     * @param msg error message
-     * @param ex Exception
-     */
-    private void handleError(String msg, Exception ex) {
-
-        PluginCall call = getSavedCall();
-        if (call == null) return;
-
-        Log.d(PLUGIN_TAG, "handleError");
-        call.reject(msg, ex);
+        resultMap.put("deviceData", deviceData);
+        return resultMap;
     }
 
     /**
@@ -194,12 +168,7 @@ public class BraintreePlugin extends Plugin {
      * @param paymentMethodNonce The nonce used to build a dictionary of data from.
      * @param deviceData Device info
      */
-    @SuppressWarnings("unused")
-    private void handleNonce(PaymentMethodNonce paymentMethodNonce, String deviceData) {
-
-        PluginCall call = getSavedCall();
-        if (call == null) return;
-
+    private JSObject handleNonce(PaymentMethodNonce paymentMethodNonce, String deviceData) {
         Log.d(PLUGIN_TAG, "handleNonce");
 
         JSObject resultMap = new JSObject();
@@ -207,6 +176,7 @@ public class BraintreePlugin extends Plugin {
         resultMap.put("nonce", paymentMethodNonce.getNonce());
         resultMap.put("type", paymentMethodNonce.getTypeLabel());
         resultMap.put("localizedDescription", paymentMethodNonce.getDescription());
+        this.deviceData = deviceData;
         // resultMap.put("deviceData", deviceData);
 
         // Card
@@ -261,6 +231,6 @@ public class BraintreePlugin extends Plugin {
             resultMap.put("venmoAccount", innerMap);
         }
 
-        call.resolve(resultMap);
+        return resultMap;
     }
 }

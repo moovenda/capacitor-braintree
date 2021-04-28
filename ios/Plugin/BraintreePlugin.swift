@@ -14,7 +14,7 @@ public class BraintreePlugin: CAPPlugin {
     @objc func getDeviceData(_ call: CAPPluginCall) {
         let metchantId = call.getString("merchantId") ?? ""
 
-        if self.dataCollector.isEmpty {
+        if metchantId.isEmpty {
             call.reject("A Merchant ID is required.")
             return
         }
@@ -34,12 +34,12 @@ public class BraintreePlugin: CAPPlugin {
          * Set App Switch
          */
         guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
-            call.error("iOS internal error - failed to get bundle identifier via Bundle.main.bundleIdentifier");
+            call.reject("iOS internal error - failed to get bundle identifier via Bundle.main.bundleIdentifier");
             return
         }
 
         if bundleIdentifier.count == 0 {
-            call.error("iOS internal error - bundle identifier via Bundle.main.bundleIdentifier was zero length");
+            call.reject("iOS internal error - bundle identifier via Bundle.main.bundleIdentifier was zero length");
             return
         }
 
